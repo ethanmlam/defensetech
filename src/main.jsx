@@ -12,10 +12,10 @@ const START = new Date('2024-01-17T14:12:00Z');
 const TOTAL_TICKS = 100;
 const LAST_KNOWN_INDEX = 30;
 
-const CABLE_ROUTE = [[-118.54, 33.745], [-118.34, 33.66], [-118.12, 33.57], [-117.91, 33.48], [-117.68, 33.405], [-117.43, 33.35]];
-const CABLE_BUFFER = [[-118.51, 33.79], [-118.26, 33.70], [-118.02, 33.61], [-117.76, 33.53], [-117.45, 33.42], [-117.48, 33.31], [-117.80, 33.40], [-118.05, 33.49], [-118.31, 33.58], [-118.58, 33.68]];
-const LANDING_STATION = [-118.39, 33.72];
-const SAR_BOX = [[-117.93, 33.56], [-117.62, 33.46], [-117.70, 33.33], [-118.01, 33.43]];
+const CABLE_ROUTE = [[-118.46, 33.705], [-118.26, 33.635], [-118.05, 33.555], [-117.84, 33.485], [-117.63, 33.42]];
+const CABLE_BUFFER = [[-118.49, 33.75], [-118.25, 33.675], [-118.03, 33.595], [-117.81, 33.525], [-117.58, 33.455], [-117.61, 33.385], [-117.86, 33.445], [-118.08, 33.515], [-118.31, 33.595], [-118.53, 33.675]];
+const LANDING_STATION = [-118.46, 33.705];
+const SAR_BOX = [[-117.93, 33.55], [-117.66, 33.47], [-117.72, 33.36], [-117.99, 33.44]];
 const REACQUIRED = [-117.735, 33.438];
 
 function interpolate(a, b, t) {
@@ -24,13 +24,13 @@ function interpolate(a, b, t) {
 
 function generateTrack() {
   const anchors = [
-    [-118.31, 33.724],
-    [-118.22, 33.676],
-    [-118.10, 33.620],
-    [-117.99, 33.566],
-    [-117.89, 33.523],
+    [-118.31, 33.705],
+    [-118.20, 33.665],
+    [-118.08, 33.610],
+    [-117.98, 33.555],
+    [-117.88, 33.505],
     [-117.735, 33.438],
-    [-117.58, 33.374],
+    [-117.60, 33.390],
   ];
   const points = [];
   for (let i = 0; i < anchors.length - 1; i++) {
@@ -143,21 +143,12 @@ function App() {
       lineWidthMinPixels: 1,
     }),
     new PathLayer({
-      id: 'cable-route-glow',
-      data: [{path: CABLE_ROUTE}],
-      getPath: d => d.path,
-      getColor: [255, 76, 102, 45],
-      getWidth: 26,
-      widthMinPixels: 16,
-      rounded: true,
-    }),
-    new PathLayer({
       id: 'cable-route',
       data: [{path: CABLE_ROUTE}],
       getPath: d => d.path,
-      getColor: [255, 76, 102, 240],
-      getWidth: 6,
-      widthMinPixels: 4,
+      getColor: [235, 83, 92, 210],
+      getWidth: 3,
+      widthMinPixels: 2,
       rounded: true,
     }),
     new PolygonLayer({
@@ -166,35 +157,35 @@ function App() {
       getPolygon: d => d.polygon,
       getFillColor: stage === 3 ? [59, 255, 166, 34] : [255, 184, 67, 34],
       getLineColor: stage === 3 ? [59, 255, 166, 235] : [255, 184, 67, 235],
-      getLineWidth: 4,
-      lineWidthMinPixels: 2,
+      getLineWidth: 2,
+      lineWidthMinPixels: 1,
     }),
     new PathLayer({
       id: 'visible-track',
       data: [{path: visibleTrack.map(d => d.position)}],
       getPath: d => d.path,
-      getColor: [72, 204, 255, 235],
-      getWidth: 5,
-      widthMinPixels: 3,
+      getColor: [92, 154, 197, 230],
+      getWidth: 3,
+      widthMinPixels: 2,
       rounded: true,
     }),
     new PathLayer({
       id: 'reacquired-track',
       data: hiddenTrack.length ? [{path: hiddenTrack.map(d => d.position)}] : [],
       getPath: d => d.path,
-      getColor: [78, 255, 172, 235],
-      getWidth: 6,
-      widthMinPixels: 4,
+      getColor: [88, 210, 149, 230],
+      getWidth: 3,
+      widthMinPixels: 2,
       rounded: true,
     }),
     new ScatterplotLayer({
       id: 'last-known',
       data: stage >= 1 ? [{position: track[LAST_KNOWN_INDEX].position}] : [],
       getPosition: d => d.position,
-      getRadius: 560,
-      radiusMinPixels: 15,
-      radiusMaxPixels: 30,
-      getFillColor: [255, 65, 88, 80],
+      getRadius: 360,
+      radiusMinPixels: 9,
+      radiusMaxPixels: 17,
+      getFillColor: [235, 83, 92, 130],
       getLineColor: [255, 65, 88, 255],
       lineWidthMinPixels: 3,
       stroked: true,
@@ -203,9 +194,9 @@ function App() {
       id: 'landing-station',
       data: [{position: LANDING_STATION}],
       getPosition: d => d.position,
-      getRadius: 440,
-      radiusMinPixels: 10,
-      radiusMaxPixels: 22,
+      getRadius: 300,
+      radiusMinPixels: 8,
+      radiusMaxPixels: 15,
       getFillColor: [255, 76, 102, 150],
       getLineColor: [255, 255, 255, 220],
       lineWidthMinPixels: 2,
@@ -215,10 +206,10 @@ function App() {
       id: 'reacquired-contact',
       data: stage === 3 ? [{position: REACQUIRED}] : [],
       getPosition: d => d.position,
-      getRadius: 520,
-      radiusMinPixels: 14,
-      radiusMaxPixels: 28,
-      getFillColor: [73, 255, 164, 150],
+      getRadius: 340,
+      radiusMinPixels: 9,
+      radiusMaxPixels: 17,
+      getFillColor: [88, 210, 149, 165],
       getLineColor: [255, 255, 255, 240],
       lineWidthMinPixels: 2,
       stroked: true,
@@ -234,17 +225,17 @@ function App() {
       ],
       getPosition: d => d.position,
       getText: d => d.text,
-      getSize: 15,
+      getSize: 13,
       getColor: [255, 255, 255, 242],
-      getPixelOffset: [0, -30],
+      getPixelOffset: [0, -22],
       background: true,
       getBackgroundColor: [7, 12, 22, 225],
-      backgroundPadding: [8, 5],
+      backgroundPadding: [6, 4],
     }),
   ];
 
   return <div className="app">
-    <DeckGL initialViewState={{longitude: -118.03, latitude: 33.60, zoom: 8.75, pitch: 42, bearing: -20}} controller={true} layers={layers}>
+    <DeckGL initialViewState={{longitude: -118.04, latitude: 33.58, zoom: 8.9, pitch: 28, bearing: -10}} controller={true} layers={layers}>
       <Map mapStyle={MAP_STYLE} />
     </DeckGL>
 
