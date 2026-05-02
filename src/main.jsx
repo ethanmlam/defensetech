@@ -11,6 +11,12 @@ import './styles.css';
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 const LAST_KNOWN_INDEX = 38;
 const TOTAL_TICKS = 98;
+const SATELLITE_PASS = [[-118.68, 33.92], [-118.43, 33.76], [-118.17, 33.61], [-117.89, 33.47], [-117.58, 33.34]];
+const CANDIDATE_CONTACTS = [
+  {position: [-117.83, 33.49], confidence: 71, label: 'CONTACT A'},
+  {position: [-117.76, 33.43], confidence: 88, label: 'CONTACT B'},
+  {position: [-117.94, 33.38], confidence: 39, label: 'CONTACT C'},
+];
 const START = new Date('2024-01-17T14:12:00Z');
 
 function interpolate(a, b, t) {
@@ -88,6 +94,19 @@ function fmtTime(index) {
   return d.toISOString().slice(11, 16) + ' UTC';
 }
 
+function missionEvents(tick, reveal) {
+  const items = [
+    ['14:12', 'AIS stream healthy, vessel speed 13.8 kn'],
+    ['15:28', 'Course change detected before dropout'],
+  ];
+  if (tick >= LAST_KNOWN_INDEX) items.push(['15:30', 'AIS LOST, custody timer started']);
+  if (tick >= 48) items.push(['15:38', 'Monte Carlo search cloud generated']);
+  if (tick >= 56) items.push(['15:44', 'EO degraded, cloud cover blocks visual ID']);
+  if (tick >= 62) items.push(['15:52', 'SAR pass available, tasking polygon uplinked']);
+  if (reveal) items.push(['16:08', 'Radar contact matched predicted box']);
+  return items.slice(-5);
+}
+
 function App() {
   const [tick, setTick] = useState(0);
   const [playing, setPlaying] = useState(true);
@@ -100,6 +119,8 @@ function App() {
   const truthTrail = reveal ? track.slice(LAST_KNOWN_INDEX, displayIndex + 1) : [];
   const probability = lost && !reveal ? generateParticles(lastKnown, tick) : [];
   const polygon = lost ? ellipsePolygon(lastKnown, tick) : [];
+  const contacts = tick > 63 ? CANDIDATE_CONTACTS.slice(0, reveal ? 3 : 2) : [];
+  const events = missionEvents(tick, reveal);
   const sweepStart = [-118.52, 33.88];
   const sweepEnd = polygon[Math.floor(polygon.length * 0.62)] || lastKnown;
 
@@ -154,6 +175,15 @@ function App() {
       getLineWidth: 4,
       lineWidthMinPixels: 2,
     }),
+    new PathLayer({
+      id: 'satellite-pass',
+      data: lost ? [{path: SATELLITE_PASS}] : [],
+      getPath: d => d.path,
+      getColor: [134, 218, 255, 155],
+      getWidth: 3,
+      widthMinPixels: 2,
+      dashJustified: true,
+    }),
     new ArcLayer({
       id: 'sensor-sweep',
       data: lost ? [{from: sweepStart, to: sweepEnd}] : [],
@@ -174,6 +204,18 @@ function App() {
       rounded: true,
     }),
     new ScatterplotLayer({
+      id: 'candidate-contacts',
+      data: contacts,
+      getPosition: d => d.position,
+      getRadius: d => d.confidence * 6,
+      radiusMinPixels: 8,
+      radiusMaxPixels: 22,
+      getFillColor: d => d.confidence > 80 ? [58, 255, 164, 185] : [255, 187, 64, 150],
+      getLineColor: [255, 255, 255, 230],
+      lineWidthMinPixels: 2,
+      stroked: true,
+    }),
+    new ScatterplotLayer({
       id: 'last-known',
       data: lost ? [{position: lastKnown}] : [],
       getPosition: d => d.position,
@@ -189,6 +231,8 @@ function App() {
       id: 'labels',
       data: lost ? [
         {position: lastKnown, text: 'AIS LOST'},
+        ...(tick > 63 ? contacts.map(c => ({position: c.position, text: `${c.label} ${c.confidence}%`})) : []),
+        ...(lost ? [{position: SATELLITE_PASS[2], text: 'SAR PASS'}] : []),
         ...(reveal ? [{position: track[Math.min(displayIndex, track.length - 1)].position, text: 'GROUND TRUTH'}] : []),
       ] : [],
       getPosition: d => d.position,
@@ -249,9 +293,18 @@ function App() {
       {lost && <div className="taskbox"><Eye size={18}/> TASK SAR OVER SEARCH POLYGON<br/><span>38.2 km², expected reacquisition window: 26 min</span></div>}
     </section>
 
+    <section className="hud intel">
+      <div className="eyebrow">Mission event stream</div>
+      {events.map(([time, text], i) => <div className="event" key={time + text}>
+        <span>{time}</span><p>{text}</p>{i === events.length - 1 && <b>LIVE</b>}
+      </div>)}
+    </section>
+
+    <div className="reticle"><span></span><span></span></div>
+
     <footer className="hud timeline">
       <div className="bar"><div style={{width: `${progress}%`}} /></div>
-      <div className="ticks"><span>Normal AIS</span><span>AIS lost</span><span>SAR tasking</span><span>Reveal</span></div>
+      <div className="ticks"><span>Normal AIS</span><span>AIS lost</span><span>SAR tasking</span><span>Radar match</span></div>
     </footer>
   </div>;
 }

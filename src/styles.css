@@ -49,3 +49,19 @@ meter { width: 100%; height: 8px; margin: 10px 0 7px; accent-color: #55ffbb; }
   .mission { top: 96px; }
   .tag { display: none; }
 }
+.intel { left: 22px; bottom: 116px; width: 376px; border-radius: 22px; padding: 17px; }
+.event { position: relative; display: grid; grid-template-columns: 48px 1fr 42px; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+.event:last-child { border-bottom: 0; }
+.event span { color: #67e4ff; font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.event p { color: #d4deea; font-size: 12px; margin: 0; }
+.event b { color: #071018; background: #57ffb8; font-size: 10px; padding: 4px 6px; border-radius: 999px; text-align: center; box-shadow: 0 0 20px rgba(87,255,184,.45); }
+.reticle { pointer-events: none; position: absolute; z-index: 9; left: 50%; top: 50%; width: 280px; height: 280px; margin-left: -140px; margin-top: -140px; border: 1px solid rgba(96, 231, 255, .13); border-radius: 999px; box-shadow: 0 0 80px rgba(52, 212, 255, .08); animation: pulse-ring 2.4s ease-in-out infinite; }
+.reticle:before, .reticle:after { content: ''; position: absolute; background: rgba(96,231,255,.22); }
+.reticle:before { left: 50%; top: 0; width: 1px; height: 100%; }
+.reticle:after { top: 50%; left: 0; height: 1px; width: 100%; }
+.reticle span:first-child { position: absolute; inset: 42px; border: 1px dashed rgba(96,231,255,.18); border-radius: 999px; animation: spin 14s linear infinite; }
+.reticle span:last-child { position: absolute; left: 50%; top: 50%; width: 48%; height: 2px; background: linear-gradient(90deg, rgba(87,255,184,.8), rgba(87,255,184,0)); transform-origin: left center; animation: sweep 3.2s linear infinite; }
+@keyframes sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+@keyframes pulse-ring { 0%,100% { opacity: .48; transform: scale(.96); } 50% { opacity: .9; transform: scale(1.04); } }
+@media (max-width: 900px) { .intel, .reticle { display: none; } }
